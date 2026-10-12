@@ -37,7 +37,12 @@ export const register: Register = on => {
     const entry: BtwEntry = { id: crypto.randomUUID(), question, answer: null, at: stamp(now) }
     await update($, history, list => [...list, entry].slice(-50))
 
-    const reply = await $.model.fork({ prompt: question })
+    const forked = await $.model.fork({ prompt: question })
+    // 新 session、/clear 或 resume 後主對話還沒有回應可 fork，改成不帶對話脈絡直接問
+    const reply =
+      !forked.isAnswered && forked.reason === 'nothing-to-fork'
+        ? await $.model.complete({ model: 'sonnet', prompt: question })
+        : forked
     const answer = reply.isAnswered ? reply.text : `_No answer (${reply.reason})._`
     const done = { ...entry, answer }
     await update($, history, list => list.map(one => (one.id === entry.id ? done : one)))

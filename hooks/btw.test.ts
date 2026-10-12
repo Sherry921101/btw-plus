@@ -56,3 +56,23 @@ test('/btw 寫入紀錄；舊的問答預設收合，點三角形可展開再收
     await ui.unmount()
   }
 })
+
+test('主對話還沒有回應（nothing-to-fork）時，改用 model.complete 回答', async ($, on) => {
+  const written: string[] = []
+  const usage = { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }
+  on('model.fork', () => ({ value: { isAnswered: false, reason: 'nothing-to-fork' } }))
+  on('model.complete', (_, e) => ({ value: { isAnswered: true, text: `PLAIN ${e.prompt}`, usage } }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('session.root', () => ({ value: 'C:/proj' }))
+  on('clock.now', () => ({ value: Date.UTC(2026, 9, 11, 2, 0) }))
+  on('fs.read', () => {
+    throw new Error('ENOENT')
+  })
+  on('fs.write', (_, e) => {
+    written.push(e.text)
+    return { value: undefined }
+  })
+
+  await $.command.run({ command: 'btw', args: 'why?' })
+  expect(written.at(-1)).toContain('PLAIN why?')
+})
