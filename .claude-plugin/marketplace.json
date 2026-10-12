@@ -1,0 +1,5 @@
+{
+  "name": "btw-plus",
+  "owner": { "name": "Sherry921101" },
+  "plugins": [{ "name": "btw-plus", "source": "./" }]
+}

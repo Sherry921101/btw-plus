@@ -1,0 +1,7 @@
+{
+  "name": "btw-plus",
+  "version": "0.1.0",
+  "description": "Shows /btw answers in a large, collapsible pane and saves every Q&A to <project>/.claude/btw-history.md",
+  "author": { "name": "Sherry921101" },
+  "types": "./types/index.d.ts"
+}
